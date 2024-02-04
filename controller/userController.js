@@ -96,8 +96,6 @@ const handleUpdateDetails = async (req, res) => {
     // Validate input using Zod schema for user details
     const validatedData = userDetails.parse({ firstName, lastName });
 
-    console.log(validatedData);
-
     if (validatedData && id) {
       // Update user details by ID
       await User.findByIdAndUpdate(id, { firstName, lastName });

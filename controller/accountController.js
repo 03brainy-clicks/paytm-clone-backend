@@ -33,6 +33,7 @@ const handleTransaction = async (req, res) => {
     // Extracting values
     const { receiver, amount } = req.body;
 
+    // Creating data object for validation
     const data = {
       receiver,
       userId,
