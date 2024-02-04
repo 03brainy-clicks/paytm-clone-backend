@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const accountSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId, // Reference to User model
+    type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
@@ -12,13 +12,17 @@ const accountSchema = new mongoose.Schema({
   },
   transactions: [
     {
-      amount: { type: String, required: true },
+      action: { type: String, required: true },
+      transactionId: { type: String, required: true, unique: true },
+      amount: { type: Number, required: true },
       sender: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
       },
       receiver: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
       },
     },

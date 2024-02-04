@@ -1,5 +1,6 @@
 const Account = require("../models/accountModel");
 const { transactions } = require("../zod");
+const { v4: uuidv4 } = require("uuid");
 
 // Check Balance
 const handleCheckBalance = async (req, res) => {
@@ -33,12 +34,16 @@ const handleTransaction = async (req, res) => {
     // Extracting values
     const { receiver, amount } = req.body;
 
+    // Generate a unique transaction ID
+    const transactionId = uuidv4();
+
     // Creating data object for validation
     const data = {
       receiver,
       userId,
       amount: parseInt(amount),
     };
+
     // Validate input using Zod schema for user details
     const validatedData = transactions.parse(data);
 
@@ -68,19 +73,45 @@ const handleTransaction = async (req, res) => {
     }
 
     // Perform the transfer
-    await Account.updateOne({ userId }, { $inc: { balance: -amount } });
+    await Account.updateOne(
+      { userId },
+      {
+        $inc: { balance: -amount },
+        $push: {
+          transactions: {
+            action: "send",
+            transactionId,
+            amount,
+            sender: userId,
+            receiver,
+          },
+        },
+      }
+    );
+
     await Account.updateOne(
       { userId: receiver },
-      { $inc: { balance: amount } }
+      {
+        $inc: { balance: amount },
+        $push: {
+          transactions: {
+            action: "receive",
+            transactionId,
+            amount,
+            sender: userId,
+            receiver,
+          },
+        },
+      }
     );
 
     return res.status(200).json({
       message: "Transfer successful",
+      transactionId,
     });
   } catch (error) {
     console.error("Error in transaction:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 module.exports = { handleCheckBalance, handleTransaction };
