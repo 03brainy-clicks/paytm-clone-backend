@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const { userSignin, userSignup, userDetails, usersRange } = require("../zod");
 const jwt = require("jsonwebtoken");
-const JWT_PASSWORD = "PAYTM@07";
+const JWT_PASSWORD = process.env.JWT_PASSWORD;
 const SALT = 10;
 
 // Database

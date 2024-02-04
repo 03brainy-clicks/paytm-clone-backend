@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
-const JWT_PASSWORD = "PAYTM@07";
+const JWT_PASSWORD = process.env.JWT_PASSWORD;
 
 // Middleware for handling auth
 async function userAuthMiddleware(req, res, next) {
