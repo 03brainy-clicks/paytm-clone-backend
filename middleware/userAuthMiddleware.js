@@ -1,3 +1,5 @@
+// Parsing env file
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const JWT_PASSWORD = process.env.JWT_PASSWORD;

@@ -1,3 +1,5 @@
+// Parsing env file
+require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { userSignin, userSignup, userDetails, usersRange } = require("../zod");
 const jwt = require("jsonwebtoken");
