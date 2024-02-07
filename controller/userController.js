@@ -1,7 +1,13 @@
 // Parsing env file
 require("dotenv").config();
 const bcrypt = require("bcrypt");
-const { userSignin, userSignup, userDetails, usersRange,updatePassword } = require("../zod");
+const {
+  userSignin,
+  userSignup,
+  userDetails,
+  usersRange,
+  updatePassword,
+} = require("../zod");
 const jwt = require("jsonwebtoken");
 const JWT_PASSWORD = process.env.JWT_PASSWORD;
 const SALT = 10;
@@ -76,7 +82,7 @@ const handleSignin = async (req, res) => {
           { username: userExist.username, userId: userExist._id },
           JWT_PASSWORD
         );
-        return res.status(200).json({ token, username: userExist.username });
+        return res.status(200).json({ token, userId: userExist._id });
       } else {
         return res.status(401).json({ message: "Invalid password" });
       }
@@ -256,5 +262,5 @@ module.exports = {
   handleResetPassword,
   handleGetUsers,
   handleGetUser,
-  handleCheckUsernameAvailability
+  handleCheckUsernameAvailability,
 };
