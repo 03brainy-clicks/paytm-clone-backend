@@ -25,6 +25,29 @@ const handleCheckBalance = async (req, res) => {
   }
 };
 
+// Check Balance
+const handleGetTransactions = async (req, res) => {
+  try {
+    // Assuming you have a user ID available in req.user.id after authentication
+    const userId = req.user.userId;
+
+    // Find the user's account based on the user ID
+    const userAccount = await Account.findOne({ userId });
+
+    // Check if the user account exists
+    if (!userAccount) {
+      return res.status(404).json({ error: "User account not found" });
+    }
+
+    // Extract and send the transactions in the response
+    const transactions  = userAccount.transactions;
+    res.status(200).json({ transactions });
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 // Transfer
 const handleTransaction = async (req, res) => {
   try {
@@ -114,4 +137,4 @@ const handleTransaction = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-module.exports = { handleCheckBalance, handleTransaction };
+module.exports = { handleCheckBalance, handleTransaction, handleGetTransactions };
