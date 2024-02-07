@@ -1,3 +1,4 @@
+// account.js
 const mongoose = require("mongoose");
 
 const accountSchema = new mongoose.Schema({
@@ -13,8 +14,8 @@ const accountSchema = new mongoose.Schema({
   transactions: [
     {
       action: { type: String, required: true },
-      transactionId: { type: String, required: true, unique: true },
       amount: { type: Number, required: true },
+      transactionId: { type: String, required: true },
       sender: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

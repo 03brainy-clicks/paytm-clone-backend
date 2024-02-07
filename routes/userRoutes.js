@@ -6,14 +6,17 @@ const {
   handleResetPassword,
   handleGetUsers,
   handleGetUser,
+  handleCheckUsernameAvailability,
 } = require("../controller/userController");
 const userAuthMiddleware = require("../middleware/userAuthMiddleware");
 const router = express.Router();
 
-// Get Users /
+// Get Users / filter
 router.get("/", handleGetUsers);
-// Get Users /
+// Get User /
 router.get("/:id", handleGetUser);
+// Check username avilable /username
+router.post("/username", handleCheckUsernameAvailability);
 // Signup /signup
 router.post("/signup", handleSignup);
 // Signup /signin

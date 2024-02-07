@@ -1,7 +1,7 @@
 // Parsing env file
 require("dotenv").config();
 const bcrypt = require("bcrypt");
-const { userSignin, userSignup, userDetails, usersRange } = require("../zod");
+const { userSignin, userSignup, userDetails, usersRange,updatePassword } = require("../zod");
 const jwt = require("jsonwebtoken");
 const JWT_PASSWORD = process.env.JWT_PASSWORD;
 const SALT = 10;
@@ -35,7 +35,7 @@ const handleSignup = async (req, res) => {
         lastName,
       });
 
-      // Creating account
+      // Create an account for the user
       await Account.create({
         userId: user._id,
         balance: Math.round(1 + Math.random() * 1000000),
@@ -76,7 +76,7 @@ const handleSignin = async (req, res) => {
           { username: userExist.username, userId: userExist._id },
           JWT_PASSWORD
         );
-        return res.status(200).json({ token });
+        return res.status(200).json({ token, username: userExist.username });
       } else {
         return res.status(401).json({ message: "Invalid password" });
       }
@@ -124,7 +124,7 @@ const handleResetPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const validatedData = updatedPassword.parse({
+    const validatedData = updatePassword.parse({
       currentPassword,
       updatedPassword,
     });
@@ -154,29 +154,42 @@ const handleResetPassword = async (req, res) => {
   }
 };
 
-// Get Users
+// Get Users & filter
 const handleGetUsers = async (req, res) => {
   try {
-    // Extract range parameters from query
-    const { start, end } = req.query;
+    // Extract parameters from body
+    const { start, end, filterBy, filterValue } = req.body;
 
-    const validatedData = usersRange.parse({
-      start,
-      end,
-    });
+    // Apply pagination
+    const startIndex = start ? parseInt(start, 10) : 0;
+    const endIndex = end ? parseInt(end, 10) : startIndex + 19;
 
     // Validate input using Zod schema for user details
+    const validatedData = usersRange.parse({
+      start: startIndex,
+      end: endIndex,
+    });
     if (!validatedData) {
       return res.status(404).json({ message: "Invalid data type" });
     }
 
-    // Convert start and end to integers
-    const startIdx = parseInt(start, 10) || 0;
-    const endIdx = parseInt(end, 10) || startIdx + 19;
+    // Construct filter based on filterBy and filterValue
+    const filter = {};
+    if (filterBy && filterValue) {
+      if (filterBy === "firstName") {
+        filter.firstname = filterValue;
+      } else if (filterBy === "lastName") {
+        filter.lastname = filterValue;
+      } else if (filterBy === "id") {
+        filter._id = filterValue;
+      }
+      // Add more conditions for other filter options if needed
+    }
 
-    const users = await User.find({})
-      .skip(startIdx)
-      .limit(endIdx - startIdx + 1);
+    // Find users based on filter and pagination
+    const users = await User.find(filter)
+      .skip(startIndex)
+      .limit(endIndex - startIndex + 1);
 
     if (!users || users.length === 0) {
       return res.status(404).json({ message: "No Users Found" });
@@ -204,11 +217,35 @@ const handleGetUser = async (req, res) => {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.status(200).json({ user });
+      // Omitting the password field from the user object
+      const { password, ...userWithoutPassword } = user.toObject();
+      res.status(200).json({ user: userWithoutPassword });
     }
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+// Post Username avilable
+const handleCheckUsernameAvailability = async (req, res) => {
+  const { username } = req.body;
+
+  try {
+    // Check if the username exists in the database
+    const existingUser = await User.findOne({ username });
+
+    // If a user with the given username exists, return false
+    if (existingUser) {
+      return res.json({ available: false });
+    }
+
+    // If no user with the given username exists, return true
+    return res.json({ available: true });
+  } catch (error) {
+    console.error("Error checking username availability:", error);
+    // Return false in case of any error
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -219,4 +256,5 @@ module.exports = {
   handleResetPassword,
   handleGetUsers,
   handleGetUser,
+  handleCheckUsernameAvailability
 };
