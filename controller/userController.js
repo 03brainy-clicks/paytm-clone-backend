@@ -180,14 +180,14 @@ const handleGetUsers = async (req, res) => {
     }
 
     // Construct filter based on filterBy and filterValue
-    const filter = {};
+    let filter = {};
     if (filterBy && filterValue) {
       if (filterBy === "firstName") {
-        filter.firstname = filterValue;
+        filter.firstName = { $regex: filterValue, $options: "i" };
       } else if (filterBy === "lastName") {
-        filter.lastname = filterValue;
-      } else if (filterBy === "id") {
-        filter._id = filterValue;
+        filter.lastName = { $regex: filterValue, $options: "i" };
+      } else if (filterBy === "username") {
+        filter.username = { $regex: filterValue, $options: "i" };
       }
       // Add more conditions for other filter options if needed
     }

@@ -12,9 +12,9 @@ const userAuthMiddleware = require("../middleware/userAuthMiddleware");
 const router = express.Router();
 
 // Get Users / filter
-router.get("/", handleGetUsers);
+router.get("/", userAuthMiddleware, handleGetUsers);
 // Get User /
-router.get("/:id", handleGetUser);
+router.get("/:id", userAuthMiddleware, handleGetUser);
 // Check username avilable /username
 router.post("/username", handleCheckUsernameAvailability);
 // Signup /signup
