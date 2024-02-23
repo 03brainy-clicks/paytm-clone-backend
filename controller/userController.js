@@ -164,7 +164,7 @@ const handleResetPassword = async (req, res) => {
 const handleGetUsers = async (req, res) => {
   try {
     // Extract parameters from body
-    const { start, end, filterBy, filterValue } = req.body;
+    const { start, end, filterBy, filterValue } = req.params;
 
     // Apply pagination
     const startIndex = start ? parseInt(start, 10) : 0;
