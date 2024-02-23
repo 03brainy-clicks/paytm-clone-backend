@@ -161,10 +161,63 @@ const handleResetPassword = async (req, res) => {
 };
 
 // Get Users & filter
+// const handleGetUsers = async (req, res) => {
+//   try {
+//     // Extract parameters from body
+//     const { start, end, filterBy, filterValue } = req.params;
+
+//     // Apply pagination
+//     const startIndex = start ? parseInt(start, 10) : 0;
+//     const endIndex = end ? parseInt(end, 10) : startIndex + 19;
+
+//     // Validate input using Zod schema for user details
+//     const validatedData = usersRange.parse({
+//       start: startIndex,
+//       end: endIndex,
+//     });
+//     if (!validatedData) {
+//       return res.status(404).json({ message: "Invalid data type" });
+//     }
+
+//     // Construct filter based on filterBy and filterValue
+//     let filter = {};
+//     if (filterBy && filterValue) {
+//       if (filterBy === "firstName") {
+//         filter.firstName = { $regex: filterValue, $options: "i" };
+//       } else if (filterBy === "lastName") {
+//         filter.lastName = { $regex: filterValue, $options: "i" };
+//       } else if (filterBy === "username") {
+//         filter.username = { $regex: filterValue, $options: "i" };
+//       }
+//       // Add more conditions for other filter options if needed
+//     }
+
+//     // Find users based on filter and pagination
+//     const users = await User.find(filter)
+//       .skip(startIndex)
+//       .limit(endIndex - startIndex + 1);
+
+//     if (!users || users.length === 0) {
+//       return res.status(404).json({ message: "No Users Found" });
+//     }
+
+//     // Remove the password field from each user object
+//     const usersWithoutPassword = users.map((user) => {
+//       const { password, ...userWithoutPassword } = user.toObject();
+//       return userWithoutPassword;
+//     });
+
+//     res.status(200).json({ users: usersWithoutPassword });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: "Something went wrong" });
+//   }
+// };
+
 const handleGetUsers = async (req, res) => {
   try {
-    // Extract parameters from body
-    const { start, end, filterBy, filterValue } = req.params;
+    // Extract parameters from query instead of params
+    const { start, end, filterBy, filterValue } = req.query;
 
     // Apply pagination
     const startIndex = start ? parseInt(start, 10) : 0;
@@ -175,19 +228,21 @@ const handleGetUsers = async (req, res) => {
       start: startIndex,
       end: endIndex,
     });
-    if (!validatedData) {
-      return res.status(404).json({ message: "Invalid data type" });
+
+    // Check if validation failed and send a 400 Bad Request response
+    if (validatedData._tag === "Left") {
+      return res.status(400).json({ message: "Invalid data type" });
     }
 
     // Construct filter based on filterBy and filterValue
     let filter = {};
     if (filterBy && filterValue) {
       if (filterBy === "firstName") {
-        filter.firstName = { $regex: filterValue, $options: "i" };
+        filter.firstName = { $regex: new RegExp(filterValue, "i") };
       } else if (filterBy === "lastName") {
-        filter.lastName = { $regex: filterValue, $options: "i" };
+        filter.lastName = { $regex: new RegExp(filterValue, "i") };
       } else if (filterBy === "username") {
-        filter.username = { $regex: filterValue, $options: "i" };
+        filter.username = { $regex: new RegExp(filterValue, "i") };
       }
       // Add more conditions for other filter options if needed
     }
